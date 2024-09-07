@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-
-
+// Use the specific database for GameSummit
 const db = mongoose.connection.useDb("GameSummit");
+
 // Define the schema for the game
-const gameSchema = new mongoose.Schema({
+const gameSchema = new Schema({
   gameName: {
     type: String,
     required: true,
@@ -32,8 +32,8 @@ const gameSchema = new mongoose.Schema({
     required: true,
   },
   awards: {
-    type: [String],
-    default: ['None'], // Default value if not provided
+    type: String,
+    default: "None", // Single string field, default value is "None"
   },
   description: {
     type: String,
@@ -47,8 +47,21 @@ const gameSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  coverPhoto: {
+    type: String,
+    required: true,
+  },
+  inGameCaptures: {
+    type: [String], // Array of strings for image URLs
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now, // Default to current date/time if not provided
+  },
 });
 
+// Create the model using the defined schema
 const Game = db.model("Games", gameSchema);
 
 module.exports = Game;

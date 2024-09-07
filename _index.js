@@ -13,7 +13,10 @@ const { mongoose } = require("mongoose");
 
 mongoose.connect(mongoURL);
 
-server.use(cors());
+server.use(cors({
+  credentials: true,
+  allowedHeaders: ['Authorization', 'Content-Type'], // Ensure Authorization header is allowed
+}));
 server.use(bodyParser.json());
 server.use(express.urlencoded({ extended: false }));
 

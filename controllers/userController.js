@@ -1,6 +1,6 @@
 const User = require("../model/userModel");
 const Moderator = require("../model/moderatorModel");
-
+const Reviews = require("../model/reviewsModel");
 const Article = require("../model/articleModel");
 const Game = require("../model/gameModel");
 const jwt = require("jsonwebtoken");
@@ -161,15 +161,13 @@ exports.postReview = async (req, res) => {
 
 exports.getReviews = async (req, res) => {
   const { gameId } = req.params;
-  //   console.log("gae id is " + gameId);
+
   try {
-    // Fetch up to 7 reviews for the given gameId
-    const reviews = await Review.find(
+   
+    const reviews = await Reviews.find(
       { id: gameId },
       { projection: { reviewText: 1, rating: 1, createdAt: 1 } }
-    ) // Adjust the fields as needed
-      .limit(7) // Limit the results to 7 reviews
-      .toArray();
+    ).limit(7);
 
     res.status(200).json(reviews);
   } catch (error) {
