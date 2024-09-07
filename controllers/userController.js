@@ -38,3 +38,24 @@ exports.logIn=async (req,res)=>{
     }
     
 } 
+
+exports.addModerators=async (req,res)=>{
+    const { name, email, password } = req.body;
+    try {
+        const { collection: moderators } = await databaseConnect("Moderators"); 
+        
+        // Check if the moderator already exists
+        const existingModerator = await moderators.findOne({ email });
+        if (existingModerator) {
+            return res.status(400).json({ message: 'Moderator already exists' });
+        }
+
+        // Insert the new moderator into the Moderators collection
+        const result = await moderators.insertOne({ name, email, password });
+        res.status(201).json({ message: 'Moderator added successfully', insertedId: result.insertedId });
+    } catch (error) {
+        console.error('Error adding moderator:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+    
+} 

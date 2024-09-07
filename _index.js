@@ -6,7 +6,7 @@ const {MongoClient, ObjectId} = require('mongodb');
 const multer = require('multer');
 const path = require('path');
 const server = express();
-const cloudinary = require('./cloudinaryConfig');
+const cloudinary = require('./config/cloudinaryConfig');
 const {CloudinaryStorage} = require('multer-storage-cloudinary')
 
 const mongoURL = 'mongodb+srv://lehanselaka:Ammasandaki@testrad.9qpuq.mongodb.net/'
@@ -76,25 +76,7 @@ server.get('/',(req,res)=>{
 //     }
 // });
 
-server.post('/add-moderator', async (req, res) => {
-    const { name, email, password } = req.body;
-    try {
-        const { collection: moderators } = await databaseConnect("Moderators"); 
-        
-        // Check if the moderator already exists
-        const existingModerator = await moderators.findOne({ email });
-        if (existingModerator) {
-            return res.status(400).json({ message: 'Moderator already exists' });
-        }
 
-        // Insert the new moderator into the Moderators collection
-        const result = await moderators.insertOne({ name, email, password });
-        res.status(201).json({ message: 'Moderator added successfully', insertedId: result.insertedId });
-    } catch (error) {
-        console.error('Error adding moderator:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
 
 // Route to get all moderators - when routed to moderators from dashboard
 server.get('/moderators', async (req, res) => {
