@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-
-
 const db = mongoose.connection.useDb("GameSummit");
 
 // Define the schema for the user
@@ -24,7 +22,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Pre-save hook to hash the password before saving the user
-userSchema.pre('save', async function (next) {
+userSchema.pre("save", async function (next) {
   try {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(this.password, salt);
@@ -40,7 +38,7 @@ userSchema.statics.login = async function (email, candidatePassword) {
   try {
     // Find the user by email or username
     const user = await this.findOne({
-      email: email
+      email: email,
     });
 
     if (!user) {
