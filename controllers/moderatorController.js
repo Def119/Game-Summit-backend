@@ -1,17 +1,11 @@
-<<<<<<< Updated upstream
 const Article = require("../model/articleModel");
 const Game = require("../model/gameModel");
-=======
-const Game = require("../model/gameModel");
-const Article = require("../model/articleModel");
->>>>>>> Stashed changes
 
 exports.addArticle = async (req, res) => {
   try {
     const { title, content } = req.body;
     const images = req.files.map((file) => file.path); // Get the file paths from uploaded files
 
-<<<<<<< Updated upstream
     // Create a new article instance
     const newArticle = new Article({
       title,
@@ -22,11 +16,6 @@ exports.addArticle = async (req, res) => {
 
     // Save the new article to the database
     const savedArticle = await newArticle.save();
-=======
-    const newArticle = { title, content, images, createdAt: new Date() };
-
-    await Article.insertOne(newArticle);
->>>>>>> Stashed changes
 
     res
       .status(201)
@@ -56,12 +45,8 @@ exports.postGame = async (req, res) => {
       ? req.files["inGameCaptures[]"].map((file) => file.path)
       : [];
 
-<<<<<<< Updated upstream
     // Create a new game instance using the Game model
     const newGame = new Game({
-=======
-    const newGame = {
->>>>>>> Stashed changes
       gameName,
       category,
       userRating: 0,  // Initial rating value
@@ -76,12 +61,8 @@ exports.postGame = async (req, res) => {
       inGameCaptures, // Add in-game capture URLs
     });
 
-<<<<<<< Updated upstream
     // Save the new game to the database
     const savedGame = await newGame.save();
-=======
-    await Game.insertOne(newGame);
->>>>>>> Stashed changes
 
     res.status(201).json({ message: "Game added successfully", game: savedGame });
   } catch (error) {
@@ -94,7 +75,6 @@ exports.deleteGame = async (req, res) => {
   try {
     const { id } = req.params;
 
-<<<<<<< Updated upstream
     // Validate the ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid game ID format" });
@@ -103,14 +83,6 @@ exports.deleteGame = async (req, res) => {
     // Check if the game exists
     const game = await Game.findById(id);
     if (!game) {
-=======
-
-    // OF THERE ARE REVIEWS< TEHY SHOULD DELETE TOO!
-
-    const result = await Game.deleteOne({ _id: new ObjectId(id) });
-
-    if (result.deletedCount === 0) {
->>>>>>> Stashed changes
       return res.status(404).json({ message: "Game not found" });
     }
 
