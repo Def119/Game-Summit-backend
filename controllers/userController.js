@@ -1,5 +1,6 @@
 const User = require("../model/userModel");
 const Article = require("../model/articleModel");
+const Game = require("../model/gameModel");
 const jwt = require("jsonwebtoken");
 const SECRET_KEY = "your_secret_key"; 
 
@@ -57,13 +58,12 @@ exports.getGames = async (req, res) => {
   console.log(searchTerm);
 
   try {
-    const { collection: games } = await databaseConnect("Games"); // Connect to the database
-
+    
     let gamesList;
 
     if (searchTerm) {
       // Perform a case-insensitive search on the gameName field and project the desired fields
-      gamesList = await games
+      gamesList = await Game
         .find(
           { gameName: { $regex: searchTerm, $options: "i" } }, // Case-insensitive search
           {
@@ -102,12 +102,11 @@ exports.getGameInfo = async (req, res) => {
   console.log(gameId);
 
   try {
-    const { collection: games } = await databaseConnect("Games");
 
     // Convert the string ID to ObjectId
     const gameObjectId = new ObjectId(gameId);
     console.log(gameObjectId);
-    const game = await games.findOne({ _id: gameObjectId });
+    const game = await Game.findOne({ _id: gameObjectId });
 
     if (game) {
       console.log(game.json);
@@ -129,9 +128,6 @@ exports.postReview = async (req, res) => {
       return res.status(400).json({ error: "Game ID is required" });
     }
 
-    const { collection: reviews } = await databaseConnect("Reviews");
-    const { collection: games } = await databaseConnect("Games");
-
     // Create the review object
     const newReview = {
       id,
@@ -141,19 +137,21 @@ exports.postReview = async (req, res) => {
     };
 
     // Insert the new review
-    await reviews.insertOne(newReview);
+    await Review.insertOne(newReview);
 
     // Update the game's rating and number of users rated
-    const game = await games.findOne({ _id: new ObjectId(id) });
+    const game = await Game.findOne({ _id: new ObjectId(id) });
 
     if (game) {
       const newUserRating =
         (game.userRating * game.usersRated + Number(rating)) /
         (game.usersRated + 1);
-      await games.updateOne(
+
+      await Game.updateOne(
         { _id: new ObjectId(id) },
         { $set: { userRating: newUserRating, usersRated: game.usersRated + 1 } }
       );
+      
     }
 
     res.status(201).json({
@@ -170,10 +168,9 @@ exports.getReviews = async (req, res) => {
   const { gameId } = req.params;
   console.log("gae id is " + gameId);
   try {
-    const { collection: reviewsCollection } = await databaseConnect("Reviews"); // Connect to the Reviews collection
 
     // Fetch up to 7 reviews for the given gameId
-    const reviews = await reviewsCollection
+    const reviews = await Review
       .find(
         { id: gameId },
         { projection: { reviewText: 1, rating: 1, createdAt: 1 } }
@@ -181,7 +178,6 @@ exports.getReviews = async (req, res) => {
       .limit(7) // Limit the results to 7 reviews
       .toArray();
 
-    console.log("enne nane" + reviews);
     res.status(200).json(reviews);
   } catch (error) {
     console.error("Error fetching reviews:", error);

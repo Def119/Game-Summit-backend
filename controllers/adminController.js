@@ -1,3 +1,6 @@
+
+
+
 exports.addModerators = async (req, res) => {
   const { name, email, password } = req.body;
   try {
