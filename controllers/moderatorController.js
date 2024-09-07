@@ -1,18 +1,25 @@
-
+const Article = require("../model/articleModel");
+const Game = require("../model/gameModel");
 
 exports.addArticle = async (req, res) => {
   try {
     const { title, content } = req.body;
-    const images = req.files.map((file) => file.path); 
+    const images = req.files.map((file) => file.path); // Get the file paths from uploaded files
 
-    const { collection: articles } = await databaseConnect("Articles");
-    const newArticle = { title, content, images, createdAt: new Date() };
+    // Create a new article instance
+    const newArticle = new Article({
+      title,
+      content,
+      images,
+      createdAt: new Date(),
+    });
 
-    await articles.insertOne(newArticle);
+    // Save the new article to the database
+    const savedArticle = await newArticle.save();
 
     res
       .status(201)
-      .json({ message: "Article added successfully", article: newArticle });
+      .json({ message: "Article added successfully", article: savedArticle });
   } catch (error) {
     console.error("Error adding article:", error);
     res.status(500).json({ message: "Failed to add article" });
@@ -32,35 +39,32 @@ exports.postGame = async (req, res) => {
       ageRating,
     } = req.body;
 
-    // Cloudinary URLs
-    const coverPhoto = req.files.coverPhoto
-      ? req.files.coverPhoto[0].path
-      : null;
+    // Cloudinary URLs for cover photo and in-game captures
+    const coverPhoto = req.files.coverPhoto ? req.files.coverPhoto[0].path : null;
     const inGameCaptures = req.files["inGameCaptures[]"]
       ? req.files["inGameCaptures[]"].map((file) => file.path)
       : [];
 
-    const { collection: games } = await databaseConnect("Games");
-
-    const newGame = {
+    // Create a new game instance using the Game model
+    const newGame = new Game({
       gameName,
       category,
-      userRating: 0,
-      usersRated: 0,
+      userRating: 0,  // Initial rating value
+      usersRated: 0,  // Initial number of ratings
       releaseDate,
-      platforms: JSON.parse(platforms),
-      awards,
+      platforms: JSON.parse(platforms), // Parse platforms if it's sent as a JSON string
+      awards: awards || ['None'], // Use default if awards not provided
       description,
       introSentence,
       ageRating,
-      coverPhoto,
-      inGameCaptures,
-      createdAt: new Date(),
-    };
+      coverPhoto, // Add cover photo URL
+      inGameCaptures, // Add in-game capture URLs
+    });
 
-    await games.insertOne(newGame);
+    // Save the new game to the database
+    const savedGame = await newGame.save();
 
-    res.status(201).json({ message: "Game added successfully", game: newGame });
+    res.status(201).json({ message: "Game added successfully", game: savedGame });
   } catch (error) {
     console.error("Error adding game:", error);
     res.status(500).json({ message: "Failed to add game" });
@@ -71,15 +75,22 @@ exports.deleteGame = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { collection: games } = await databaseConnect("Games");
+    // Validate the ID format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid game ID format" });
+    }
 
-    // OF THERE ARE REVIEWS< TEHY SHOULD DELETE TOO!
-
-    const result = await games.deleteOne({ _id: new ObjectId(id) });
-
-    if (result.deletedCount === 0) {
+    // Check if the game exists
+    const game = await Game.findById(id);
+    if (!game) {
       return res.status(404).json({ message: "Game not found" });
     }
+
+    // Delete associated reviews if there are any
+    await Review.deleteMany({ gameId: id }); // Adjust the field if reviews are linked differently
+
+    // Delete the game
+    await Game.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Game deleted successfully" });
   } catch (error) {
