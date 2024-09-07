@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
+
 const Schema = mongoose.Schema;
 
 
@@ -50,5 +50,5 @@ const gameSchema = new mongoose.Schema({
 });
 
 const Game = db.model("Games", gameSchema);
-// Export the model to use it in other parts of the application
+
 module.exports = Game;
