@@ -1,6 +1,7 @@
-const j = require("jsonwebtoken");
-
 const User = require("../model/userModel");
+const jwt = require("jsonwebtoken");
+const User = require("./models/User"); 
+const SECRET_KEY = "your_secret_key"; 
 
 exports.signUp = async (req, res) => {
   const { username, email, password } = req.body;
@@ -12,22 +13,39 @@ exports.signUp = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
+
     // Insert the new user into the Users collection
     const newUser = new User({ username, email, password });
     await newUser.save();
 
-    res.status(201).json({ message: "User signed up successfully" });
+    // Generate a JWT token for the new user
+    const token = jwt.sign(
+      { userId: newUser.id }, // Include payload data, e.g., user ID
+      SECRET_KEY,
+      { expiresIn: "1h" } // Set token expiration time
+    );
+
+    // Return the token along with a success message
+    res.status(201).json({ message: "User signed up successfully", token });
   } catch (error) {
     console.error("Error signing up user:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 exports.logIn = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const data = await User.login(email, password);
-    return res.json(data);
+    const user = await User.login(email, password); // Assuming this returns user data if login is successful
+
+    // Generate a JWT token
+    const token = jwt.sign(
+      { userId: user.id }, // Include payload data, e.g., user ID
+      SECRET_KEY,
+      { expiresIn: "1h" } // Set token expiration time
+    );
+
+    // Return the token along with user data
+    return res.json({ user, token });
   } catch (error) {
     console.error("Error logging in user:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -138,12 +156,10 @@ exports.postReview = async (req, res) => {
       );
     }
 
-    res
-      .status(201)
-      .json({
-        message: "Review and game rating updated successfully",
-        review: newReview,
-      });
+    res.status(201).json({
+      message: "Review and game rating updated successfully",
+      review: newReview,
+    });
   } catch (error) {
     console.error("Error adding review:", error);
     res.status(500).json({ message: "Failed to add review" });

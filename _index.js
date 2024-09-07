@@ -22,11 +22,6 @@ server.use(userRoutes);
 server.use(adminRoutes);
 server.use(moderatorRoutes);
 
-server.get("/", (req, res) => {
-  console.log("badu dennada?");
-  res.send("asdasdasd");
-});
-
 
 
 try {
