@@ -1,7 +1,7 @@
 exports.addArticle = async (req, res) => {
   try {
     const { title, content } = req.body;
-    const images = req.files.map((file) => file.path); // Cloudinary returns the full URL in `file.path`
+    const images = req.files.map((file) => file.path); 
 
     const { collection: articles } = await databaseConnect("Articles");
     const newArticle = { title, content, images, createdAt: new Date() };
