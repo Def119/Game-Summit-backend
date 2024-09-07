@@ -1,6 +1,6 @@
 const User = require("../model/userModel");
+const Article = require("../model/articleModel");
 const jwt = require("jsonwebtoken");
-const User = require("./models/User"); 
 const SECRET_KEY = "your_secret_key"; 
 
 exports.signUp = async (req, res) => {
@@ -191,11 +191,12 @@ exports.getReviews = async (req, res) => {
 
 exports.getArticles = async (req, res) => {
   try {
-    const { collection: articles } = await databaseConnect("Articles");
+    
+    const articleList = await Article.find();
 
-    const articleList = await articles.find().toArray();
     res.status(200).json(articleList);
   } catch (err) {
+    console.error("Error fetching articles:", err);
     res.status(500).json({ message: "Failed to fetch articles" });
   }
 };
