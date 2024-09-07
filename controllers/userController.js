@@ -1,8 +1,11 @@
 const User = require("../model/userModel");
+const Moderator = require("../model/moderatorModel");
+
 const Article = require("../model/articleModel");
 const Game = require("../model/gameModel");
 const jwt = require("jsonwebtoken");
-const SECRET_KEY = "your_secret_key"; 
+const SECRET_KEY = "your_secret_key";
+const mongoose = require("mongoose");
 
 exports.signUp = async (req, res) => {
   const { username, email, password } = req.body;
@@ -36,17 +39,21 @@ exports.signUp = async (req, res) => {
 exports.logIn = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.login(email, password); // Assuming this returns user data if login is successful
+    const user = await User.login(email, password);
+    const moderator = false;
+    if (!user) {
+      user = await Moderator.login(email, password);
+      moderator = true;
+    }
 
-    // Generate a JWT token
     const token = jwt.sign(
-      { userId: user.id }, // Include payload data, e.g., user ID
+      { userId: user.id, moderator: moderator ,admin:false }, // Include payload data, e.g., user ID
       SECRET_KEY,
       { expiresIn: "1h" } // Set token expiration time
     );
 
     // Return the token along with user data
-    return res.json({ user, token });
+    return res.json({ moderator: moderator,admin:false, token });
   } catch (error) {
     console.error("Error logging in user:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -58,35 +65,23 @@ exports.getGames = async (req, res) => {
   console.log(searchTerm);
 
   try {
-    
     let gamesList;
 
     if (searchTerm) {
-      // Perform a case-insensitive search on the gameName field and project the desired fields
-      gamesList = await Game
-        .find(
-          { gameName: { $regex: searchTerm, $options: "i" } }, // Case-insensitive search
-          {
-            projection: {
-              gameName: 1,
-              userRating: 1,
-              image: 1,
-              category: 1,
-              coverPhoto: 1,
-            },
-          } // Include only these fields
-        )
-        .toArray(); // Convert the result to an array
+      // Perform a case-insensitive search on the gameName field and select the desired fields
+      gamesList = await Game.find(
+        { gameName: { $regex: searchTerm, $options: "i" } }, // Case-insensitive search
+        "gameName userRating image category coverPhoto" // Fields to include
+      ).exec(); // Execute the query
     } else {
-      // Fetch all games, sort by userRating, limit to 12, and project the desired fields
-      gamesList = await games
-        .find(
-          {}, // No filter, get all documents
-          { projection: { gameName: 1, userRating: 1, image: 1, category: 1 } } // Include only these fields
-        )
-        .sort({ userRating: -1 }) // Sort by rating in descending order
-        .limit(12)
-        .toArray(); // Convert the result to an array
+      // Fetch all games, sort by userRating, limit to 12, and select the desired fields
+      gamesList = await Game.find(
+        {}, // No filter, get all documents
+        "gameName userRating image category coverPhoto" // Fields to include
+      )
+        .sort({ userRating: -1 }) // Sort by userRating in descending order
+        .limit(12) // Limit to 12 results
+        .exec(); // Execute the query
     }
 
     // Send the filtered list of games as the response
@@ -98,18 +93,19 @@ exports.getGames = async (req, res) => {
 };
 
 exports.getGameInfo = async (req, res) => {
-  let gameId = req.params.id; // Get the game ID from the request parameters
+  const gameId = req.params.id; // Get the game ID from the request parameters
   console.log(gameId);
 
   try {
+    // Check if the provided ID is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(gameId)) {
+      return res.status(400).json({ message: "Invalid game ID format" });
+    }
 
-    // Convert the string ID to ObjectId
-    const gameObjectId = new ObjectId(gameId);
-    console.log(gameObjectId);
-    const game = await Game.findOne({ _id: gameObjectId });
+    // Find the game by its ID using Mongoose
+    const game = await Game.findById(gameId);
 
     if (game) {
-      console.log(game.json);
       res.status(200).json(game);
     } else {
       res.status(404).json({ message: "Game not found" });
@@ -151,7 +147,6 @@ exports.postReview = async (req, res) => {
         { _id: new ObjectId(id) },
         { $set: { userRating: newUserRating, usersRated: game.usersRated + 1 } }
       );
-      
     }
 
     res.status(201).json({
@@ -166,15 +161,13 @@ exports.postReview = async (req, res) => {
 
 exports.getReviews = async (req, res) => {
   const { gameId } = req.params;
-//   console.log("gae id is " + gameId);
+  //   console.log("gae id is " + gameId);
   try {
-
     // Fetch up to 7 reviews for the given gameId
-    const reviews = await Review
-      .find(
-        { id: gameId },
-        { projection: { reviewText: 1, rating: 1, createdAt: 1 } }
-      ) // Adjust the fields as needed
+    const reviews = await Review.find(
+      { id: gameId },
+      { projection: { reviewText: 1, rating: 1, createdAt: 1 } }
+    ) // Adjust the fields as needed
       .limit(7) // Limit the results to 7 reviews
       .toArray();
 
@@ -187,7 +180,6 @@ exports.getReviews = async (req, res) => {
 
 exports.getArticles = async (req, res) => {
   try {
-    
     const articleList = await Article.find();
 
     res.status(200).json(articleList);
