@@ -12,6 +12,8 @@ const {CloudinaryStorage} = require('multer-storage-cloudinary')
 const mongoURL = 'mongodb+srv://lehanselaka:Ammasandaki@testrad.9qpuq.mongodb.net/'
 
 const userRoutes = require('./routes/userRoutes');
+const moderatorRoutes = require('./routes/moderatorRoutes');
+const adminRoutes = require('./routes/adminRouter');
 const {mongoose } = require('mongoose');
 
 
@@ -24,7 +26,6 @@ server.use(express.urlencoded({extended:false}));
 const database = new MongoClient(mongoURL);
 
 
-server.use(userRoutes)
 
 server.get('/',(req,res)=>{
     console.log("badu dennada?");
@@ -327,6 +328,9 @@ const storage = new CloudinaryStorage({
 // });
   
  
+server.use(userRoutes);
+server.use(adminRoutes);
+server.use(moderatorRoutes);
 
     //assert connection to database
 async function databaseConnect(collectionName) {

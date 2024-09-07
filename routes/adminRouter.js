@@ -4,8 +4,8 @@ const router = express.Router();
 const adminController = require("../controllers/adminController");
 
 
-server.get('/moderators',adminController.getModerators);
+router.get('/moderators',adminController.getModerators);
 
-server.delete('/moderators/:id',adminController.deleteModerator);
+router.delete('/moderators/:id',adminController.deleteModerator);
 
 router.post("/add-moderator", adminController.addModerators);
