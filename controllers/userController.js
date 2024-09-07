@@ -9,7 +9,7 @@ exports.signUp = async (req, res) => {
   try {
     console.log(req.body);
 
-    // Check if the user already exists
+    // Check if the user already existsW
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
@@ -166,7 +166,7 @@ exports.postReview = async (req, res) => {
 
 exports.getReviews = async (req, res) => {
   const { gameId } = req.params;
-  console.log("gae id is " + gameId);
+//   console.log("gae id is " + gameId);
   try {
 
     // Fetch up to 7 reviews for the given gameId
