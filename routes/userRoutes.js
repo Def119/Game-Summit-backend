@@ -7,6 +7,17 @@ router.post("/signUp", userController.signUp);
 
 router.post("/logIn", userController.logIn);
 
-router.post("/add-moderator", userController.addModerators);
+server.get('/articles', userController.getArticles);
+
+
+server.get('/games', userController.getGames);
+
+server.get('/games/:id', userController.getGameInfo);
+
+
+server.post('/add-review', userController.postReview);
+
+server.get('/reviews/:gameId', userController.getReviews);
+    
 
 module.exports = router;
