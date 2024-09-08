@@ -13,19 +13,17 @@ const { mongoose } = require("mongoose");
 
 mongoose.connect(mongoURL);
 
-server.use(cors({
-  credentials: true,
-  allowedHeaders: ['Authorization', 'Content-Type'], // Ensure Authorization header is allowed
-}));
+server.use(
+  cors({
+    credentials: true,
+  })
+);
 server.use(bodyParser.json());
 server.use(express.urlencoded({ extended: false }));
-
 
 server.use(userRoutes);
 server.use(adminRoutes);
 server.use(moderatorRoutes);
-
-
 
 try {
   server.listen(3001, () => {

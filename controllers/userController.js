@@ -26,7 +26,7 @@ exports.signUp = async (req, res) => {
     const token = jwt.sign(
       { userId: newUser.id }, // Include payload data, e.g., user ID
       SECRET_KEY,
-      { expiresIn: "1h" } // Set token expiration time
+      { expiresIn: "8h" } // Set token expiration time
     );
 
     // Return the token along with a success message
@@ -47,13 +47,13 @@ exports.logIn = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id, moderator: moderator ,admin:false }, // Include payload data, e.g., user ID
+      { userId: user.id, moderator: moderator, admin: false }, // Include payload data, e.g., user ID
       SECRET_KEY,
-      { expiresIn: "1h" } // Set token expiration time
+      { expiresIn: "8h" } // Set token expiration time
     );
 
     // Return the token along with user data
-    return res.json({ moderator: moderator,admin:false, token });
+    return res.json({ moderator: moderator, admin: false, token });
   } catch (error) {
     console.error("Error logging in user:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -116,10 +116,9 @@ exports.getGameInfo = async (req, res) => {
   }
 };
 
-
 exports.postReview = async (req, res) => {
   try {
-    const { id, reviewText, rating, reviewerId, reviewerName } = req.body;
+    const { id, reviewText, rating } = req.body;
 
     if (!id) {
       return res.status(400).json({ error: "Game ID is required" });
@@ -130,8 +129,7 @@ exports.postReview = async (req, res) => {
       gameId: id,
       reviewText,
       rating: Number(rating),
-    //   reviewerId,    // Optional: Add reviewer's ID
-    //   reviewerName,  // Optional: Add reviewer's name
+    
       createdAt: new Date(),
     });
 
@@ -169,9 +167,14 @@ exports.getReviews = async (req, res) => {
 
   try {
     // Convert to ObjectId if necessary
-    const query = { gameId: ObjectId.isValid(gameId) ? new ObjectId(gameId) : gameId };
+    const query = {
+      gameId: ObjectId.isValid(gameId) ? new ObjectId(gameId) : gameId,
+    };
 
-    const reviews = await Review.find(query, 'reviewText rating createdAt').limit(7);
+    const reviews = await Review.find(
+      query,
+      "reviewText rating createdAt"
+    ).limit(7);
 
     res.status(200).json(reviews);
   } catch (error) {
@@ -180,10 +183,9 @@ exports.getReviews = async (req, res) => {
   }
 };
 
-
 exports.getArticles = async (req, res) => {
   try {
-    console.log("asdsdas22");
+  
     const articleList = await Article.find().limit(20);
 
     res.status(200).json(articleList);
@@ -193,18 +195,16 @@ exports.getArticles = async (req, res) => {
   }
 };
 
+exports.getArticle = async (req, res) => {
+  try {
+    const articleId = req.params.articleId;
 
-exports.getArticle=  async (req, res) => {
-    try {
-      const articleId = req.params.articleId;
-    
-      const article = await Article.findById(articleId);
-      if (!article) {
-        return res.status(404).json({ message: 'Article not found' });
-      }
-      res.json(article);
-    } catch (error) {
-      res.status(500).json({ message: 'Server error' });
+    const article = await Article.findById(articleId);
+    if (!article) {
+      return res.status(404).json({ message: "Article not found" });
     }
+    res.json(article);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
   }
-  
+};
