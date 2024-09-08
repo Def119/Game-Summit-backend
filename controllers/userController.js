@@ -118,16 +118,17 @@ exports.getGameInfo = async (req, res) => {
 
 exports.postReview = async (req, res) => {
   try {
-    const { gameId, reviewText, rating } = req.body;
+    const { id, reviewText, rating } = req.body;
     const { userId } = req.user;
 
-    if (!gameId) {
+    console.log(id,reviewText,rating, userId);
+    if (!id) {
       return res.status(400).json({ error: "Game ID is required" });
     }
 
     // Create the review object
     const newReview = new Review({
-      gameId: gameId,
+      gameId: id,
       userId: userId,
       reviewText,
       rating: Number(rating),
@@ -139,7 +140,7 @@ exports.postReview = async (req, res) => {
     await newReview.save();
 
     // Update the game's rating and number of users rated
-    const game = await Game.findOne({ _id: gameId });
+    const game = await Game.findOne({ _id: id });
 
     if (game) {
       const newUserRating =
@@ -147,7 +148,7 @@ exports.postReview = async (req, res) => {
         (game.usersRated + 1);
 
       await Game.updateOne(
-        { _id: gameId },
+        { _id: id },
         { $set: { userRating: newUserRating, usersRated: game.usersRated + 1 } }
       );
     }
