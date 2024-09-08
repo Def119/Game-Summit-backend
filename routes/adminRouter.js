@@ -8,7 +8,7 @@ router.get('/moderators',adminController.getModerators);
 
 router.delete('/moderators/:id',auth,adminController.deleteModerator);
 
-router.post("/add-moderator",auth, adminController.addModerators);
+router.post("/add-moderator", adminController.addModerators);
 
 router.get("/inquiries", adminController.getInquiries);
 

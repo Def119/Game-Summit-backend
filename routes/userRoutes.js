@@ -22,4 +22,8 @@ router.get("/articles/:articleId",userController.getArticle);
 
 router.post("/contact", userController.postInquiry);
 
+router.delete("/reviews/:id",auth, userController.deleteReview);
+
+router.get("/reviews/exists/:id",auth, userController.checkExistingReview);
+
 module.exports = router;

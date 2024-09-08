@@ -38,53 +38,62 @@ exports.signUp = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 exports.logIn = async (req, res) => {
   const { email, password } = req.body;
-  let user;
+  let user = null;
   let moderator = false;
   let admin = false;
 
   try {
+    // Attempt to log in as a regular user
     try {
-      // Attempt to log in as a regular user
       user = await User.login(email, password);
     } catch (error) {
       console.error("Error logging in user:", error);
     }
 
+    // If not a regular user, attempt to log in as a moderator
     if (!user) {
       try {
-        // If not a regular user, attempt to log in as a moderator
         user = await Moderator.login(email, password);
-        moderator = true;
+        if (user) moderator = true;
       } catch (error) {
         console.error("Error logging in moderator:", error);
       }
     }
 
-    
+    // If not a user or moderator, check if it's an admin
+    if (!user && !moderator) {
+      const adminEmail = process.env.ADMIN_EMAIL; // You need to set this in your .env file
+      const adminPasswordHash = process.env.ADMIN_PASSWORD; // This should be a hashed password in your .env file
 
-    if (!moderator) {
-      console.log(password);
-      console.log(process.env.ADMIN_PASSWORD);
-
-      const isMatch = await bcrypt.compare(password, process.env.ADMIN_PASSWORD);
-      admin = isMatch;
+      if (email === adminEmail) {
+        const isMatch = await bcrypt.compare(password, adminPasswordHash);
+        if (isMatch) {
+          admin = true;
+          user = { id: 'admin' }; // Assign a placeholder ID for admin
+        }
+      }
     }
 
-    // Use the user ID safely
-    const userId = user?.id; // Safely access user.id
+    // If no valid user was found, return an error
+    if (!user && !admin) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
     // Generate a JWT token with the user data
     const token = jwt.sign(
-      { userId, moderator, admin }, // Payload with user ID and roles
+      { userId: user.id, moderator, admin },
       SECRET_KEY,
-      { expiresIn: "8h" } // Token expiration time
+      { expiresIn: "8h" }
     );
 
     // Return the token along with user data
     return res.json({ moderator, admin, token });
+
   } catch (error) {
-    console.error("Error logging in user:", error);
+    console.error("Error in login process:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -264,3 +273,72 @@ exports.postInquiry = async (req, res) => {
     res.status(500).json({ message: "Failed to create inquiry" });
   }
 };
+
+
+// Check if a user has already reviewed a game
+exports.checkExistingReview = async (req, res) => {
+  try {
+    const { id:gameId } = req.params;
+    const { userId } = req.user;
+    
+    // console.log("game " + gameId + " user " + userId);
+    
+    const gameObjectId = new mongoose.Types.ObjectId(gameId);
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const existingReview = await Review.findOne({ gameId: gameObjectId, userId: userObjectId });
+
+    res.json({ hasReviewed: !!existingReview });
+  } catch (error) {
+    console.error('Error checking existing review:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Delete a review
+exports.deleteReview = async (req, res) => {
+  try {
+    const { id: gameId } = req.params;
+    const { userId } = req.user;
+
+    console.log("game " + gameId + " user " + userId);
+    
+    const gameObjectId = new mongoose.Types.ObjectId(gameId);
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    // Find and delete the review
+    const review = await Review.findOneAndDelete({ gameId: gameObjectId, userId: userObjectId });
+
+    if (!review) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
+
+    // Fetch the corresponding game
+    const game = await Game.findById(gameObjectId);
+
+    if (!game) {
+      return res.status(404).json({ message: 'Game not found' });
+    }
+
+    // Recalculate the overall userRating
+    const currentTotalRating = game.userRating * game.usersRated;
+    const newUsersRated = game.usersRated - 1;
+
+    // Avoid division by zero when there are no users left
+    const newUserRating = newUsersRated > 0 
+      ? (currentTotalRating - review.rating) / newUsersRated 
+      : 0;
+
+    // Update the game with the new rating and usersRated count
+    await Game.updateOne(
+      { _id: gameObjectId },
+      { $set: { userRating: newUserRating, usersRated: newUsersRated } }
+    );
+
+    res.json({ message: 'Review deleted and game rating updated successfully' });
+  } catch (error) {
+    console.error('Error deleting review and updating game rating:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
