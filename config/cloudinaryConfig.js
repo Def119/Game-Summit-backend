@@ -1,10 +1,10 @@
-// cloudinaryConfig.js
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require("cloudinary").v2;
+require("dotenv").config();
 
 cloudinary.config({
-  cloud_name: 'dtftt3fil', // Replace with your Cloudinary cloud name
-  api_key: '362918788951647',       // Replace with your Cloudinary API key
-  api_secret: 'Q-s55BKT4ZR-bIOlhBNzL6om3_Q'  // Replace with your Cloudinary API secret
+  cloud_name: process.env.CLOUD_NAME, // Replace with your Cloudinary cloud name
+  api_key: process.env.API_KEY, // Replace with your Cloudinary API key
+  api_secret: process.env.API_SECRETE, // Replace with your Cloudinary API secret
 });
 
 module.exports = cloudinary;

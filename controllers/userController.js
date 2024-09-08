@@ -4,7 +4,8 @@ const Moderator = require("../model/moderatorModel");
 const Article = require("../model/articleModel");
 const Game = require("../model/gameModel");
 const jwt = require("jsonwebtoken");
-const SECRET_KEY = "your_secret_key";
+require("dotenv").config();
+const SECRET_KEY = process.env.SECRET_KEY;
 const mongoose = require("mongoose");
 
 exports.signUp = async (req, res) => {
@@ -121,7 +122,7 @@ exports.postReview = async (req, res) => {
     const { id, reviewText, rating } = req.body;
     const { userId } = req.user;
 
-    console.log(id,reviewText,rating, userId);
+    console.log(id, reviewText, rating, userId);
     if (!id) {
       return res.status(400).json({ error: "Game ID is required" });
     }

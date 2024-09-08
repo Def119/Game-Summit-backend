@@ -2,9 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const server = express();
-
-const mongoURL =
-  "mongodb+srv://lehanselaka:Ammasandaki@testrad.9qpuq.mongodb.net/";
+require("dotenv").config();
+const mongoURL =process.env.MONGOURL;
 
 const userRoutes = require("./routes/userRoutes");
 const moderatorRoutes = require("./routes/moderatorRoutes");
@@ -32,3 +31,5 @@ try {
 } catch (error) {
   console.error("Failed to start server:", error);
 }
+
+
