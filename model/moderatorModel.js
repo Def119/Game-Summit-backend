@@ -40,7 +40,7 @@ userSchema.statics.login = async function (email, candidatePassword) {
     });
 
     if (!user) {
-      throw new Error("User not found");
+      throw new Error("Moderator not found");
     }
 
     const isMatch = await bcrypt.compare(candidatePassword, user.password);

@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const SECRET_KEY = process.env.SECRET_KEY;
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 exports.signUp = async (req, res) => {
   const { username, email, password } = req.body;
@@ -39,27 +40,55 @@ exports.signUp = async (req, res) => {
 };
 exports.logIn = async (req, res) => {
   const { email, password } = req.body;
+  let user;
+  let moderator = false;
+  let admin = false;
+
   try {
-    const user = await User.login(email, password);
-    const moderator = false;
-    if (!user) {
-      user = await Moderator.login(email, password);
-      moderator = true;
+    try {
+      // Attempt to log in as a regular user
+      user = await User.login(email, password);
+    } catch (error) {
+      console.error("Error logging in user:", error);
     }
 
+    if (!user) {
+      try {
+        // If not a regular user, attempt to log in as a moderator
+        user = await Moderator.login(email, password);
+        moderator = true;
+      } catch (error) {
+        console.error("Error logging in moderator:", error);
+      }
+    }
+
+    
+
+    if (!moderator) {
+      console.log(password);
+      console.log(process.env.ADMIN_PASSWORD);
+
+      const isMatch = await bcrypt.compare(password, process.env.ADMIN_PASSWORD);
+      admin = isMatch;
+    }
+
+    // Use the user ID safely
+    const userId = user?.id; // Safely access user.id
+    // Generate a JWT token with the user data
     const token = jwt.sign(
-      { userId: user.id, moderator: moderator, admin: false }, // Include payload data, e.g., user ID
+      { userId, moderator, admin }, // Payload with user ID and roles
       SECRET_KEY,
-      { expiresIn: "8h" } // Set token expiration time
+      { expiresIn: "8h" } // Token expiration time
     );
 
     // Return the token along with user data
-    return res.json({ moderator: moderator, admin: false, token });
+    return res.json({ moderator, admin, token });
   } catch (error) {
     console.error("Error logging in user:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 exports.getGames = async (req, res) => {
   const searchTerm = req.query.q; // Get the search term from the query parameter
