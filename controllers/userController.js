@@ -240,3 +240,27 @@ exports.getArticle = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+exports.postInquiry = async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
+
+    const newInquiry = new Inquiry({
+      name,
+      email,
+      message
+    });
+    console.log("her adada: " + newInquiry);
+    await newInquiry.save();
+
+    // Respond with the created inquiry
+    res.status(201).json({
+      message: "Inquiry created successfully",
+      inquiry: newInquiry
+    });
+  } catch (error) {
+    console.error("Error creating inquiry:", error);
+    res.status(500).json({ message: "Failed to create inquiry" });
+  }
+};

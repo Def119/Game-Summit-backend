@@ -10,4 +10,8 @@ router.delete('/moderators/:id',auth,adminController.deleteModerator);
 
 router.post("/add-moderator",auth, adminController.addModerators);
 
+router.get("/inquiries", adminController.getInquiries);
+
+router.put("/inquiries/:id", adminController.updateInquiryFlag);
+
 module.exports = router;

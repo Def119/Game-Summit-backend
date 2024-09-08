@@ -1,4 +1,5 @@
 const Moderator = require("../model/moderatorModel");
+const Inquiry = require("../model/inquiryModel")
 
 
 exports.addModerators = async (req, res) => {
@@ -57,3 +58,66 @@ exports.getModerators = async (req, res) => {
       res.status(500).json({ message: "Internal server error." });
     }
   };
+
+
+  exports.getInquiries = async (req, res) => {
+    try {
+      const allInquiries = await Inquiry.find({})
+        .sort({ readFlag: 1, date: -1 }); //unreviewed and latest  first 
+      res.status(200).json(allInquiries);
+    } catch (error) {
+      console.error("Error fetching inquiries:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
+
+
+  const reviewInquiry = async (id) => {
+    return await Inquiry.findByIdAndUpdate(
+      id,
+      { readFlag: true }, 
+      { new: true } 
+    );
+  };
+  
+
+  exports.reviewInquiry = async (req, res) => {
+    try {
+      const inquiryId = req.params.id;
+      const updatedInquiry = await reviewInquiry(inquiryId);
+  
+      if (!updatedInquiry) {
+        return res.status(404).json({ success: false, message: 'Inquiry not found' });
+      }
+  
+      res.status(200).json({ success: true, data: updatedInquiry });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
+    }
+  };
+
+
+
+exports.updateInquiryFlag = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updatedInquiry = await Inquiry.findByIdAndUpdate(
+      id,
+      { readFlag:true },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedInquiry) {
+      return res.status(404).json({ message: 'Inquiry not found' });
+    }
+
+    res.status(200).json({
+      message: 'Inquiry updated successfully',
+      inquiry: updatedInquiry
+    });
+  } catch (error) {
+    console.error('Error updating inquiry:', error);
+    res.status(500).json({ message: 'Failed to update inquiry' });
+  }
+};

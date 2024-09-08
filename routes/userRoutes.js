@@ -20,4 +20,6 @@ router.get("/reviews/:gameId", userController.getReviews);
 
 router.get("/articles/:articleId",userController.getArticle);
 
+router.post("/contact", userController.postInquiry);
+
 module.exports = router;
