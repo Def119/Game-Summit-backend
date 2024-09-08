@@ -5,7 +5,7 @@ const authenticateToken = (req, res, next) => {
 
   const authHeader = req.header("Authorization");
 
-  console.log(authHeader);
+
 
   
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -18,11 +18,10 @@ const authenticateToken = (req, res, next) => {
   try {
     
     const decoded = jwt.verify(token, SECRET_KEY);
-    console.log(decoded);
+  
 
     
     req.user = decoded;
-
     
     next();
   } catch (error) {
