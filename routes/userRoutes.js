@@ -14,8 +14,10 @@ router.get("/games", userController.getGames);
 
 router.get("/games/:id", userController.getGameInfo);
 
-router.post("/add-review",auth,userController.postReview);
+router.post("/add-review",userController.postReview);
 
 router.get("/reviews/:gameId", userController.getReviews);
+
+router.get("/articles/:articleId",userController.getArticle)
 
 module.exports = router;

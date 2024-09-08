@@ -1,5 +1,7 @@
+const { default: mongoose } = require("mongoose");
 const Article = require("../model/articleModel");
 const Game = require("../model/gameModel");
+const Review = require("../model/reviewsModel");
 
 exports.addArticle = async (req, res) => {
   try {
@@ -87,7 +89,7 @@ exports.deleteGame = async (req, res) => {
     }
 
     // Delete associated reviews if there are any
-    await Review.deleteMany({ gameId: id }); // Adjust the field if reviews are linked differently
+    await Review.deleteMany({ gameId: id }); 
 
     // Delete the game
     await Game.findByIdAndDelete(id);
@@ -107,7 +109,7 @@ exports.updateGame = async (req, res) => {
 
 
     const result = await Game.updateOne(
-      { _id: new ObjectId(id) },
+      { _id: id },
       { $set: updatedGame }
     );
 
@@ -121,3 +123,92 @@ exports.updateGame = async (req, res) => {
     res.status(500).json({ message: "Failed to update game" });
   }
 };
+
+
+
+///search articles to manage
+exports.fetchArticles = async (req, res) => {
+  const searchTerm = req.query.q; // Get the search term from the query parameter
+  console.log(searchTerm);
+
+  try {
+    let articlesList;
+
+    if (searchTerm) {
+      // Perform a case-insensitive search on the title field and select the desired fields
+      articlesList = await Article.find(
+        { title: { $regex: searchTerm, $options: "i" } }, // Case-insensitive search
+        "title content images createdAt" // Fields to include
+      ).exec(); // Execute the query
+    } else {
+      // Fetch all articles, sort by createdAt, limit to 12, and select the desired fields
+      articlesList = await Article.find(
+        {}, // No filter, get all documents
+        "title content images createdAt" // Fields to include
+      )
+        .sort({ createdAt: -1 }) // Sort by createdAt in descending order
+        .limit(12) // Limit to 12 results
+        .exec(); // Execute the query
+    }
+
+    // Send the filtered list of articles as the response
+    res.status(200).json(articlesList);
+  } catch (err) {
+    console.error("Error fetching articles:", err);
+    res.status(500).json({ message: "Failed to fetch articles" });
+  }
+};
+
+exports.updateArticle = async (req, res) => {
+  const articleId = req.params.id; // Get the article ID from the URL
+  const updatedData = req.body;    // Get the updated article data from the request body
+
+  console.log("Updating article with ID:", articleId);
+  console.log("Updated data:", updatedData);
+
+  try {
+    // Check if the provided ID is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(articleId)) {
+      return res.status(400).json({ message: "Invalid article ID format" });
+    }
+
+    // Find the article by ID and update it with the new data
+    const updatedArticle = await Article.findByIdAndUpdate(articleId, updatedData);
+
+    if (!updatedArticle) {
+      return res.status(404).json({ message: "Article not found" });
+    }
+
+    // Return the updated article
+    res.status(200).json({ message: "Article updated successfully", updatedArticle });
+  } catch (error) {
+    console.error("Error updating article:", error);
+    res.status(500).json({ message: "Failed to update article" });
+  }
+}
+
+exports.deleteArticle = async (req, res) => {
+  const articleId = req.params.id; // Get the article ID from the URL
+
+  console.log("Deleting article with ID:", articleId);
+
+  try {
+    // Check if the provided ID is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(articleId)) {
+      return res.status(400).json({ message: "Invalid article ID format" });
+    }
+
+    // Find the article by ID and delete it
+    const deletedArticle = await Article.findByIdAndDelete(articleId);
+
+    if (!deletedArticle) {
+      return res.status(404).json({ message: "Article not found" });
+    }
+
+    // Return a success message
+    res.status(200).json({ message: "Article deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting article:", error);
+    res.status(500).json({ message: "Failed to delete article" });
+  }
+}

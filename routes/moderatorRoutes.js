@@ -35,4 +35,10 @@ router.post(
   moderatorController.postGame
 );
 
+router.get("/fetchArticles",moderatorController.fetchArticles);
+
+router.put('/articles/:id', moderatorController.updateArticle);
+
+router.delete('/articles/:id', moderatorController.deleteArticle);
+
 module.exports = router;

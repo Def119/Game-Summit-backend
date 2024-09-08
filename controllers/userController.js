@@ -1,6 +1,6 @@
 const User = require("../model/userModel");
+const Review = require("../model/reviewsModel");
 const Moderator = require("../model/moderatorModel");
-const Reviews = require("../model/reviewsModel");
 const Article = require("../model/articleModel");
 const Game = require("../model/gameModel");
 const jwt = require("jsonwebtoken");
@@ -116,27 +116,30 @@ exports.getGameInfo = async (req, res) => {
   }
 };
 
+
 exports.postReview = async (req, res) => {
   try {
-    const { id, reviewText, rating } = req.body; ///     ADD user ID too ??????
+    const { id, reviewText, rating, reviewerId, reviewerName } = req.body;
 
     if (!id) {
       return res.status(400).json({ error: "Game ID is required" });
     }
 
     // Create the review object
-    const newReview = {
-      id,
+    const newReview = new Review({
+      gameId: id,
       reviewText,
       rating: Number(rating),
+    //   reviewerId,    // Optional: Add reviewer's ID
+    //   reviewerName,  // Optional: Add reviewer's name
       createdAt: new Date(),
-    };
+    });
 
-    // Insert the new review
-    await Review.insertOne(newReview);
+    // Save the new review
+    await newReview.save();
 
     // Update the game's rating and number of users rated
-    const game = await Game.findOne({ _id: new ObjectId(id) });
+    const game = await Game.findOne({ _id: id });
 
     if (game) {
       const newUserRating =
@@ -144,7 +147,7 @@ exports.postReview = async (req, res) => {
         (game.usersRated + 1);
 
       await Game.updateOne(
-        { _id: new ObjectId(id) },
+        { _id: id },
         { $set: { userRating: newUserRating, usersRated: game.usersRated + 1 } }
       );
     }
@@ -159,15 +162,16 @@ exports.postReview = async (req, res) => {
   }
 };
 
+const { ObjectId } = require("mongoose").Types;
+
 exports.getReviews = async (req, res) => {
   const { gameId } = req.params;
 
   try {
-   
-    const reviews = await Reviews.find(
-      { id: gameId },
-      { projection: { reviewText: 1, rating: 1, createdAt: 1 } }
-    ).limit(7);
+    // Convert to ObjectId if necessary
+    const query = { gameId: ObjectId.isValid(gameId) ? new ObjectId(gameId) : gameId };
+
+    const reviews = await Review.find(query, 'reviewText rating createdAt').limit(7);
 
     res.status(200).json(reviews);
   } catch (error) {
@@ -176,9 +180,11 @@ exports.getReviews = async (req, res) => {
   }
 };
 
+
 exports.getArticles = async (req, res) => {
   try {
-    const articleList = await Article.find();
+    console.log("asdsdas22");
+    const articleList = await Article.find().limit(20);
 
     res.status(200).json(articleList);
   } catch (err) {
@@ -186,3 +192,19 @@ exports.getArticles = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch articles" });
   }
 };
+
+
+exports.getArticle=  async (req, res) => {
+    try {
+      const articleId = req.params.articleId;
+    
+      const article = await Article.findById(articleId);
+      if (!article) {
+        return res.status(404).json({ message: 'Article not found' });
+      }
+      res.json(article);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  }
+  
