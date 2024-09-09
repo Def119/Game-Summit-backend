@@ -19,27 +19,27 @@ const upload = multer({ storage });
 
 router.post(
   "/add-article",
-  upload.array("images", 5),auth,
+  upload.array("images", 5),
   moderatorController.addArticle
 );
 
-router.delete("/games/:id",auth ,moderatorController.deleteGame);
+router.delete("/games/:id",moderatorController.deleteGame);
 
-router.put("/games/:id",auth ,moderatorController.updateGame);
+router.put("/games/:id",moderatorController.updateGame);
 
 router.post(
   "/add-game",
   upload.fields([
     { name: "coverPhoto", maxCount: 1 },
     { name: "inGameCaptures[]", maxCount: 5 },
-  ]),auth,
+  ]),
   moderatorController.postGame
 );
 
 router.get("/fetchArticles",moderatorController.fetchArticles);
 
-router.put('/articles/:id',auth, moderatorController.updateArticle);
+router.put('/articles/:id', moderatorController.updateArticle);
 
-router.delete('/articles/:id', auth,moderatorController.deleteArticle);
+router.delete('/articles/:id', moderatorController.deleteArticle);
 
 module.exports = router;

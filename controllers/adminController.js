@@ -1,6 +1,6 @@
 const Moderator = require("../model/moderatorModel");
 const Inquiry = require("../model/inquiryModel")
-
+const User = require("../model/userModel");
 
 exports.addModerators = async (req, res) => {
     const { name, email, password } = req.body;
@@ -31,7 +31,7 @@ exports.addModerators = async (req, res) => {
 
 exports.getModerators = async (req, res) => {
     try {
-      const allModerators = await Moderator.find({}); // No need to use toArray()
+      const allModerators = await Moderator.find({}); 
       res.status(200).json(allModerators);
     } catch (error) {
       console.error("Error fetching moderators:", error);
@@ -121,3 +121,41 @@ exports.updateInquiryFlag = async (req, res) => {
     res.status(500).json({ message: 'Failed to update inquiry' });
   }
 };
+
+exports.getUsers = async (req, res) => {
+  const query = req.query.query;
+
+  console.log(query);
+  try {
+    const users = await User.find({
+      $or: [
+        { username: { $regex: query, $options: 'i' } }, // case-insensitive search
+        { email: { $regex: query, $options: 'i' } }
+      ]
+    });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Error searching users', error });
+  }
+}
+
+
+exports.deleteUser = async (req, res) => {
+  const userId = req.params.id;
+
+  console.log("Deleting user with ID:", userId);
+  try {
+
+    // Find the user by ID and delete it
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Failed to delete user" });
+  }
+}

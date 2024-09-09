@@ -44,11 +44,13 @@ exports.logIn = async (req, res) => {
   let user = null;
   let moderator = false;
   let admin = false;
+  let userId=null;
 
   try {
     // Attempt to log in as a regular user
     try {
       user = await User.login(email, password);
+      userId= user?.id
     } catch (error) {
       console.error("Error logging in user:", error);
     }
@@ -58,6 +60,7 @@ exports.logIn = async (req, res) => {
       try {
         user = await Moderator.login(email, password);
         if (user) moderator = true;
+        userId= user?.id
       } catch (error) {
         console.error("Error logging in moderator:", error);
       }
@@ -86,7 +89,7 @@ exports.logIn = async (req, res) => {
 
     // Generate a JWT token with the user data
     const token = jwt.sign(
-      { userId: user?.id, moderator, admin },
+      { userId, moderator, admin },
       SECRET_KEY,
       { expiresIn: "8h" }
     );
