@@ -63,16 +63,18 @@ exports.logIn = async (req, res) => {
       }
     }
 
-    // If not a user or moderator, check if it's an admin
+    
     if (!user && !moderator) {
-      const adminEmail = process.env.ADMIN_EMAIL; // You need to set this in your .env file
-      const adminPasswordHash = process.env.ADMIN_PASSWORD; // This should be a hashed password in your .env file
-
+      const adminEmail = process.env.ADMIN_EMAIL; 
+      const adminPasswordHash = process.env.ADMIN_PASSWORD; 
+      
+// email compare  for admin check
       if (email === adminEmail) {
+        
+      console.log("given email " + email + "admin email   " + adminEmail);
         const isMatch = await bcrypt.compare(password, adminPasswordHash);
         if (isMatch) {
           admin = true;
-          user = { id: 'admin' }; // Assign a placeholder ID for admin
         }
       }
     }
@@ -84,7 +86,7 @@ exports.logIn = async (req, res) => {
 
     // Generate a JWT token with the user data
     const token = jwt.sign(
-      { userId: user.id, moderator, admin },
+      { userId: user?.id, moderator, admin },
       SECRET_KEY,
       { expiresIn: "8h" }
     );
