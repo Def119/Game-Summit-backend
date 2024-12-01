@@ -1,11 +1,11 @@
-const express = require("express");
+import express from 'express';
 const router = express.Router();
 
-const moderatorController = require("../controllers/moderatorController");
-const multer = require("multer");
-const cloudinary = require("../config/cloudinaryConfig");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const auth = require('../authentication/userAuth')
+import {deleteGame,updateGame,fetchArticles,updateArticle,deleteArticle,addArticle} from '../controllers/moderatorController'; 
+import multer from 'multer';
+import cloudinary from '../config/cloudinaryConfig';
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import auth from '../authentication/userAuth';
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -20,12 +20,12 @@ const upload = multer({ storage });
 router.post(
   "/add-article",
   upload.array("images", 5),
-  moderatorController.addArticle
+  addArticle
 );
 
-router.delete("/games/:id",moderatorController.deleteGame);
+router.delete("/games/:id",deleteGame);
 
-router.put("/games/:id",moderatorController.updateGame);
+router.put("/games/:id",updateGame);
 
 router.post(
   "/add-game",
@@ -33,13 +33,13 @@ router.post(
     { name: "coverPhoto", maxCount: 1 },
     { name: "inGameCaptures[]", maxCount: 5 },
   ]),
-  moderatorController.postGame
+  postGame
 );
 
-router.get("/fetchArticles",moderatorController.fetchArticles);
+router.get("/fetchArticles",fetchArticles);
 
-router.put('/articles/:id', moderatorController.updateArticle);
+router.put('/articles/:id', updateArticle);
 
-router.delete('/articles/:id', moderatorController.deleteArticle);
+router.delete('/articles/:id', deleteArticle);
 
-module.exports = router;
+export default router;
