@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+
 const bcrypt = require('bcrypt');
 
 const db = mongoose.connection.useDb("GameSummit");
@@ -58,4 +59,4 @@ userSchema.statics.login = async function (email, candidatePassword) {
 
 const Moderator = db.model("Moderator", userSchema);
 
-module.exports = Moderator;
+export default Moderator;

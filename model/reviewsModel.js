@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+
 const db = mongoose.connection.useDb("GameSummit");
 
 const reviewSchema = new mongoose.Schema({
@@ -11,4 +12,4 @@ const reviewSchema = new mongoose.Schema({
 
 const Review = db.model("Review", reviewSchema);
 
-module.exports = Review;
+export default Review;

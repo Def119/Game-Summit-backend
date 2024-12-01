@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
@@ -64,4 +64,4 @@ const gameSchema = new Schema({
 // Create the model using the defined schema
 const Game = db.model("Games", gameSchema);
 
-module.exports = Game;
+export default Game;

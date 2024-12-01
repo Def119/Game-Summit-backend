@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+
 const bcrypt = require("bcrypt");
 
 const db = mongoose.connection.useDb("GameSummit");
@@ -62,4 +63,4 @@ userSchema.statics.login = async function (email, candidatePassword) {
 const User = db.model("Users", userSchema);
 
 
-module.exports = User;
+export default User;

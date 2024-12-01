@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 // Define the schema for the article
 const db = mongoose.connection.useDb("GameSummit");
@@ -15,19 +15,14 @@ const articleSchema = new mongoose.Schema({
     trim: true,
   },
   images: {
-    type: [String], 
-    
+    type: [String],
   },
   createdAt: {
     type: Date,
-    default: Date.now, 
+    default: Date.now,
   },
 });
 
-
-
-
 const Article = db.model("Article", articleSchema);
 
-
-module.exports = Article;
+export default Article;
