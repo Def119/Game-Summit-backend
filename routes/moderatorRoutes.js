@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-import {deleteGame,updateGame,fetchArticles,updateArticle,deleteArticle,addArticle} from '../controllers/moderatorController'; 
+import {deleteGame,updateGame,fetchArticles,updateArticle,deleteArticle,addArticle,postGame} from '../controllers/moderatorController'; 
 import multer from 'multer';
 import cloudinary from '../config/cloudinaryConfig';
 import { CloudinaryStorage } from "multer-storage-cloudinary";
