@@ -1,29 +1,44 @@
-const express = require("express");
+import express from "express";
+import router from "../authentication/userAuth";
+import authenticateToken from "../authentication/userAuth";
+
 const router = express.Router();
-const auth = require('../authentication/userAuth')
 
-const userController = require("../controllers/userController");
+import {
+  signUp,
+  logIn,
+  getArticles,
+  getGames,
+  getGameInfo,
+  postReview,
+  getReviews,
+  getArticle,
+  postInquiry,
+  postInquiry,
+  deleteReview,
+  checkExistingReview,
+} from '"../controllers/userController';
 
-router.post("/signUp", userController.signUp);
+router.post("/signUp", signUp);
 
-router.post("/logIn", userController.logIn);
+router.post("/logIn", logIn);
 
-router.get("/articles", userController.getArticles);
+router.get("/articles", getArticles);
 
-router.get("/games", userController.getGames);
+router.get("/games", getGames);
 
-router.get("/games/:id", userController.getGameInfo);
+router.get("/games/:id", getGameInfo);
 
-router.post("/add-review",auth,userController.postReview);
+router.post("/add-review", authenticateToken, postReview);
 
-router.get("/reviews/:gameId", userController.getReviews);
+router.get("/reviews/:gameId", getReviews);
 
-router.get("/articles/:articleId",userController.getArticle);
+router.get("/articles/:articleId", getArticle);
 
-router.post("/contact", userController.postInquiry);
+router.post("/contact", postInquiry);
 
-router.delete("/reviews/:id",auth,userController.deleteReview);
+router.delete("/reviews/:id", authenticateToken, deleteReview);
 
-router.get("/reviews/exists/:id",auth, userController.checkExistingReview);
+router.get("/reviews/exists/:id", authenticateToken, checkExistingReview);
 
 module.exports = router;
