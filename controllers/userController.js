@@ -1,15 +1,18 @@
-const User = require("../model/userModel");
-const Review = require("../model/reviewsModel");
-const Moderator = require("../model/moderatorModel");
-const Article = require("../model/articleModel");
-const Game = require("../model/gameModel");
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
-const SECRET_KEY = process.env.SECRET_KEY;
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import bcrypt from 'bcrypt'
+import User from "../model/userModel";
+import Review from "../model/reviewsModel";
+import Moderator from "../model/moderatorModel";
+import Article from "../model/articleModel";
+import Game from "../model/gameModel";
+import jwt from "jsonwebtoken";
 
-exports.signUp = async (req, res) => {
+dotenv.config();
+
+const SECRET_KEY = process.env.SECRET_KEY;
+
+export const  signUp = async (req, res) => {
   const { username, email, password } = req.body;
   try {
     console.log(req.body);
@@ -39,18 +42,18 @@ exports.signUp = async (req, res) => {
   }
 };
 
-exports.logIn = async (req, res) => {
+export const  logIn = async (req, res) => {
   const { email, password } = req.body;
   let user = null;
   let moderator = false;
   let admin = false;
-  let userId=null;
+  let userId = null;
 
   try {
     // Attempt to log in as a regular user
     try {
       user = await User.login(email, password);
-      userId= user?.id
+      userId = user?.id;
     } catch (error) {
       console.error("Error logging in user:", error);
     }
@@ -60,21 +63,19 @@ exports.logIn = async (req, res) => {
       try {
         user = await Moderator.login(email, password);
         if (user) moderator = true;
-        userId= user?.id
+        userId = user?.id;
       } catch (error) {
         console.error("Error logging in moderator:", error);
       }
     }
 
-    
     if (!user && !moderator) {
-      const adminEmail = process.env.ADMIN_EMAIL; 
-      const adminPasswordHash = process.env.ADMIN_PASSWORD; 
-      
-// email compare  for admin check
+      const adminEmail = process.env.ADMIN_EMAIL;
+      const adminPasswordHash = process.env.ADMIN_PASSWORD;
+
+      // email compare  for admin check
       if (email === adminEmail) {
-        
-      console.log("given email " + email + "admin email   " + adminEmail);
+        console.log("given email " + email + "admin email   " + adminEmail);
         const isMatch = await bcrypt.compare(password, adminPasswordHash);
         if (isMatch) {
           admin = true;
@@ -88,23 +89,19 @@ exports.logIn = async (req, res) => {
     }
 
     // Generate a JWT token with the user data
-    const token = jwt.sign(
-      { userId, moderator, admin },
-      SECRET_KEY,
-      { expiresIn: "8h" }
-    );
+    const token = jwt.sign({ userId, moderator, admin }, SECRET_KEY, {
+      expiresIn: "8h",
+    });
 
     // Return the token along with user data
     return res.json({ moderator, admin, token });
-
   } catch (error) {
     console.error("Error in login process:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-
-exports.getGames = async (req, res) => {
+export const  getGames = async (req, res) => {
   const searchTerm = req.query.q; // Get the search term from the query parameter
   console.log(searchTerm);
 
@@ -136,7 +133,7 @@ exports.getGames = async (req, res) => {
   }
 };
 
-exports.getGameInfo = async (req, res) => {
+export const  getGameInfo = async (req, res) => {
   const gameId = req.params.id; // Get the game ID from the request parameters
   console.log(gameId);
 
@@ -160,7 +157,7 @@ exports.getGameInfo = async (req, res) => {
   }
 };
 
-exports.postReview = async (req, res) => {
+export const  postReview = async (req, res) => {
   try {
     const { id, reviewText, rating } = req.body;
     const { userId } = req.user;
@@ -209,7 +206,7 @@ exports.postReview = async (req, res) => {
 
 const { ObjectId } = require("mongoose").Types;
 
-exports.getReviews = async (req, res) => {
+export const  getReviews = async (req, res) => {
   const { gameId } = req.params;
 
   try {
@@ -230,7 +227,7 @@ exports.getReviews = async (req, res) => {
   }
 };
 
-exports.getArticles = async (req, res) => {
+export const  getArticles = async (req, res) => {
   try {
     const articleList = await Article.find().limit(20);
 
@@ -241,7 +238,7 @@ exports.getArticles = async (req, res) => {
   }
 };
 
-exports.getArticle = async (req, res) => {
+export const  getArticle = async (req, res) => {
   try {
     const articleId = req.params.articleId;
 
@@ -255,15 +252,14 @@ exports.getArticle = async (req, res) => {
   }
 };
 
-
-exports.postInquiry = async (req, res) => {
+export const  postInquiry = async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
     const newInquiry = new Inquiry({
       name,
       email,
-      message
+      message,
     });
     console.log("her adada: " + newInquiry);
     await newInquiry.save();
@@ -271,7 +267,7 @@ exports.postInquiry = async (req, res) => {
     // Respond with the created inquiry
     res.status(201).json({
       message: "Inquiry created successfully",
-      inquiry: newInquiry
+      inquiry: newInquiry,
     });
   } catch (error) {
     console.error("Error creating inquiry:", error);
@@ -279,50 +275,55 @@ exports.postInquiry = async (req, res) => {
   }
 };
 
-
 // Check if a user has already reviewed a game
-exports.checkExistingReview = async (req, res) => {
+export const  checkExistingReview = async (req, res) => {
   try {
-    const { id:gameId } = req.params;
+    const { id: gameId } = req.params;
     const { userId } = req.user;
-    
+
     // console.log("game " + gameId + " user " + userId);
-    
+
     const gameObjectId = new mongoose.Types.ObjectId(gameId);
     const userObjectId = new mongoose.Types.ObjectId(userId);
 
-    const existingReview = await Review.findOne({ gameId: gameObjectId, userId: userObjectId });
+    const existingReview = await Review.findOne({
+      gameId: gameObjectId,
+      userId: userObjectId,
+    });
 
     res.json({ hasReviewed: !!existingReview });
   } catch (error) {
-    console.error('Error checking existing review:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error checking existing review:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 // Delete a review
-exports.deleteReview = async (req, res) => {
+export const  deleteReview = async (req, res) => {
   try {
     const { id: gameId } = req.params;
     const { userId } = req.user;
 
     console.log("game " + gameId + " user " + userId);
-    
+
     const gameObjectId = new mongoose.Types.ObjectId(gameId);
     const userObjectId = new mongoose.Types.ObjectId(userId);
 
     // Find and delete the review
-    const review = await Review.findOneAndDelete({ gameId: gameObjectId, userId: userObjectId });
+    const review = await Review.findOneAndDelete({
+      gameId: gameObjectId,
+      userId: userObjectId,
+    });
 
     if (!review) {
-      return res.status(404).json({ message: 'Review not found' });
+      return res.status(404).json({ message: "Review not found" });
     }
 
     // Fetch the corresponding game
     const game = await Game.findById(gameObjectId);
 
     if (!game) {
-      return res.status(404).json({ message: 'Game not found' });
+      return res.status(404).json({ message: "Game not found" });
     }
 
     // Recalculate the overall userRating
@@ -330,9 +331,10 @@ exports.deleteReview = async (req, res) => {
     const newUsersRated = game.usersRated - 1;
 
     // Avoid division by zero when there are no users left
-    const newUserRating = newUsersRated > 0 
-      ? (currentTotalRating - review.rating) / newUsersRated 
-      : 0;
+    const newUserRating =
+      newUsersRated > 0
+        ? (currentTotalRating - review.rating) / newUsersRated
+        : 0;
 
     // Update the game with the new rating and usersRated count
     await Game.updateOne(
@@ -340,10 +342,11 @@ exports.deleteReview = async (req, res) => {
       { $set: { userRating: newUserRating, usersRated: newUsersRated } }
     );
 
-    res.json({ message: 'Review deleted and game rating updated successfully' });
+    res.json({
+      message: "Review deleted and game rating updated successfully",
+    });
   } catch (error) {
-    console.error('Error deleting review and updating game rating:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error deleting review and updating game rating:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
-

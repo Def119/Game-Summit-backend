@@ -1,9 +1,9 @@
-const { default: mongoose } = require("mongoose");
-const Article = require("../model/articleModel");
-const Game = require("../model/gameModel");
-const Review = require("../model/reviewsModel");
+import mongoose from "mongoose";
+import Article from "../model/articleModel";
+import Game from "../model/gameModel";
+import Review from "../model/reviewsModel";
 
-exports.addArticle = async (req, res) => {
+export const addArticle = async (req, res) => {
   try {
     const { title, content } = req.body;
     const images = req.files.map((file) => file.path); // Get the file paths from uploaded files
@@ -28,7 +28,7 @@ exports.addArticle = async (req, res) => {
   }
 };
 
-exports.postGame = async (req, res) => {
+export const postGame = async (req, res) => {
   try {
     const {
       gameName,
@@ -42,7 +42,9 @@ exports.postGame = async (req, res) => {
     } = req.body;
 
     // Cloudinary URLs for cover photo and in-game captures
-    const coverPhoto = req.files.coverPhoto ? req.files.coverPhoto[0].path : null;
+    const coverPhoto = req.files.coverPhoto
+      ? req.files.coverPhoto[0].path
+      : null;
     const inGameCaptures = req.files["inGameCaptures[]"]
       ? req.files["inGameCaptures[]"].map((file) => file.path)
       : [];
@@ -51,11 +53,11 @@ exports.postGame = async (req, res) => {
     const newGame = new Game({
       gameName,
       category,
-      userRating: 0,  // Initial rating value
-      usersRated: 0,  // Initial number of ratings
+      userRating: 0, // Initial rating value
+      usersRated: 0, // Initial number of ratings
       releaseDate,
       platforms: JSON.parse(platforms), // Parse platforms if it's sent as a JSON string
-      awards: awards || ['None'], // Use default if awards not provided
+      awards: awards || ["None"], // Use default if awards not provided
       description,
       introSentence,
       ageRating,
@@ -66,14 +68,16 @@ exports.postGame = async (req, res) => {
     // Save the new game to the database
     const savedGame = await newGame.save();
 
-    res.status(201).json({ message: "Game added successfully", game: savedGame });
+    res
+      .status(201)
+      .json({ message: "Game added successfully", game: savedGame });
   } catch (error) {
     console.error("Error adding game:", error);
     res.status(500).json({ message: "Failed to add game" });
   }
 };
 
-exports.deleteGame = async (req, res) => {
+export const deleteGame = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -89,7 +93,7 @@ exports.deleteGame = async (req, res) => {
     }
 
     // Delete associated reviews if there are any
-    await Review.deleteMany({ gameId: id }); 
+    await Review.deleteMany({ gameId: id });
 
     // Delete the game
     await Game.findByIdAndDelete(id);
@@ -101,17 +105,13 @@ exports.deleteGame = async (req, res) => {
   }
 };
 
-exports.updateGame = async (req, res) => {
+export const updateGame = async (req, res) => {
   try {
     const { id } = req.params;
     const updatedGame = req.body;
     delete updatedGame._id;
 
-
-    const result = await Game.updateOne(
-      { _id: id },
-      { $set: updatedGame }
-    );
+    const result = await Game.updateOne({ _id: id }, { $set: updatedGame });
 
     if (result.matchedCount === 0) {
       return res.status(404).json({ message: "Game not found" });
@@ -124,10 +124,8 @@ exports.updateGame = async (req, res) => {
   }
 };
 
-
-
 ///search articles to manage
-exports.fetchArticles = async (req, res) => {
+export const fetchArticles = async (req, res) => {
   const searchTerm = req.query.q; // Get the search term from the query parameter
   console.log(searchTerm);
 
@@ -159,9 +157,9 @@ exports.fetchArticles = async (req, res) => {
   }
 };
 
-exports.updateArticle = async (req, res) => {
+export const updateArticle = async (req, res) => {
   const articleId = req.params.id; // Get the article ID from the URL
-  const updatedData = req.body;    // Get the updated article data from the request body
+  const updatedData = req.body; // Get the updated article data from the request body
 
   console.log("Updating article with ID:", articleId);
   console.log("Updated data:", updatedData);
@@ -173,21 +171,26 @@ exports.updateArticle = async (req, res) => {
     }
 
     // Find the article by ID and update it with the new data
-    const updatedArticle = await Article.findByIdAndUpdate(articleId, updatedData);
+    const updatedArticle = await Article.findByIdAndUpdate(
+      articleId,
+      updatedData
+    );
 
     if (!updatedArticle) {
       return res.status(404).json({ message: "Article not found" });
     }
 
     // Return the updated article
-    res.status(200).json({ message: "Article updated successfully", updatedArticle });
+    res
+      .status(200)
+      .json({ message: "Article updated successfully", updatedArticle });
   } catch (error) {
     console.error("Error updating article:", error);
     res.status(500).json({ message: "Failed to update article" });
   }
-}
+};
 
-exports.deleteArticle = async (req, res) => {
+export const deleteArticle = async (req, res) => {
   const articleId = req.params.id; // Get the article ID from the URL
 
   console.log("Deleting article with ID:", articleId);
@@ -211,4 +214,4 @@ exports.deleteArticle = async (req, res) => {
     console.error("Error deleting article:", error);
     res.status(500).json({ message: "Failed to delete article" });
   }
-}
+};
