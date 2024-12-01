@@ -1,18 +1,18 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import bcrypt from 'bcrypt'
-import User from "../model/userModel";
-import Review from "../model/reviewsModel";
-import Moderator from "../model/moderatorModel";
-import Article from "../model/articleModel";
-import Game from "../model/gameModel";
+import bcrypt from "bcrypt";
+import User from "../model/userModel.js";
+import Review from "../model/reviewsModel.js";
+import Moderator from "../model/moderatorModel.js";
+import Article from "../model/articleModel.js";
+import Game from "../model/gameModel.js";
 import jwt from "jsonwebtoken";
 
 dotenv.config();
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
-export const  signUp = async (req, res) => {
+export const signUp = async (req, res) => {
   const { username, email, password } = req.body;
   try {
     console.log(req.body);
@@ -42,7 +42,7 @@ export const  signUp = async (req, res) => {
   }
 };
 
-export const  logIn = async (req, res) => {
+export const logIn = async (req, res) => {
   const { email, password } = req.body;
   let user = null;
   let moderator = false;
@@ -101,7 +101,7 @@ export const  logIn = async (req, res) => {
   }
 };
 
-export const  getGames = async (req, res) => {
+export const getGames = async (req, res) => {
   const searchTerm = req.query.q; // Get the search term from the query parameter
   console.log(searchTerm);
 
@@ -133,7 +133,7 @@ export const  getGames = async (req, res) => {
   }
 };
 
-export const  getGameInfo = async (req, res) => {
+export const getGameInfo = async (req, res) => {
   const gameId = req.params.id; // Get the game ID from the request parameters
   console.log(gameId);
 
@@ -157,7 +157,7 @@ export const  getGameInfo = async (req, res) => {
   }
 };
 
-export const  postReview = async (req, res) => {
+export const postReview = async (req, res) => {
   try {
     const { id, reviewText, rating } = req.body;
     const { userId } = req.user;
@@ -204,9 +204,10 @@ export const  postReview = async (req, res) => {
   }
 };
 
-const { ObjectId } = require("mongoose").Types;
+import { Types } from "mongoose";
+const { ObjectId } = Types;
 
-export const  getReviews = async (req, res) => {
+export const getReviews = async (req, res) => {
   const { gameId } = req.params;
 
   try {
@@ -227,7 +228,7 @@ export const  getReviews = async (req, res) => {
   }
 };
 
-export const  getArticles = async (req, res) => {
+export const getArticles = async (req, res) => {
   try {
     const articleList = await Article.find().limit(20);
 
@@ -238,7 +239,7 @@ export const  getArticles = async (req, res) => {
   }
 };
 
-export const  getArticle = async (req, res) => {
+export const getArticle = async (req, res) => {
   try {
     const articleId = req.params.articleId;
 
@@ -252,7 +253,7 @@ export const  getArticle = async (req, res) => {
   }
 };
 
-export const  postInquiry = async (req, res) => {
+export const postInquiry = async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
@@ -276,7 +277,7 @@ export const  postInquiry = async (req, res) => {
 };
 
 // Check if a user has already reviewed a game
-export const  checkExistingReview = async (req, res) => {
+export const checkExistingReview = async (req, res) => {
   try {
     const { id: gameId } = req.params;
     const { userId } = req.user;
@@ -299,7 +300,7 @@ export const  checkExistingReview = async (req, res) => {
 };
 
 // Delete a review
-export const  deleteReview = async (req, res) => {
+export const deleteReview = async (req, res) => {
   try {
     const { id: gameId } = req.params;
     const { userId } = req.user;

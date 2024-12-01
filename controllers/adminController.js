@@ -1,6 +1,6 @@
-import Moderator from "../model/moderatorModel";
-import Inquiry from "../model/inquiryModel";
-import User from "../model/userModel";
+import Moderator from "../model/moderatorModel.js";
+import Inquiry from "../model/inquiryModel.js";
+import User from "../model/userModel.js";
 
 export const addModerators = async (req, res) => {
   const { name, email, password } = req.body;

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const bcrypt = require('bcrypt');
+import bcrypt from "bcrypt";
 
 const db = mongoose.connection.useDb("GameSummit");
 

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import Article from "../model/articleModel";
-import Game from "../model/gameModel";
-import Review from "../model/reviewsModel";
+import Article from "../model/articleModel.js";
+import Game from "../model/gameModel.js";
+import Review from "../model/reviewsModel.js";
 
 export const addArticle = async (req, res) => {
   try {

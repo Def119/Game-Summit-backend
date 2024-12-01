@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 
-const bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
 
 const db = mongoose.connection.useDb("GameSummit");
-
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -22,7 +21,6 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-
 userSchema.pre("save", async function (next) {
   try {
     const salt = await bcrypt.genSalt(10);
@@ -34,10 +32,8 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-
 userSchema.statics.login = async function (email, candidatePassword) {
   try {
-    
     const user = await this.findOne({
       email: email,
     });
@@ -46,7 +42,6 @@ userSchema.statics.login = async function (email, candidatePassword) {
       throw new Error("User not found");
     }
 
-   
     const isMatch = await bcrypt.compare(candidatePassword, user.password);
 
     if (!isMatch) {
@@ -61,6 +56,5 @@ userSchema.statics.login = async function (email, candidatePassword) {
 
 // Create the User model
 const User = db.model("Users", userSchema);
-
 
 export default User;

@@ -1,6 +1,6 @@
 import express from "express";
-import router from "../authentication/userAuth";
-import authenticateToken from "../authentication/userAuth";
+
+import authenticateToken from "../authentication/userAuth.js";
 
 const router = express.Router();
 
@@ -14,10 +14,9 @@ import {
   getReviews,
   getArticle,
   postInquiry,
-  postInquiry,
   deleteReview,
   checkExistingReview,
-} from '"../controllers/userController';
+} from '../controllers/userController.js';
 
 router.post("/signUp", signUp);
 

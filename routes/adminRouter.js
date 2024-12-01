@@ -1,6 +1,5 @@
 import express from "express";
 
-import router from "../authentication/userAuth";
 import {
   getModerators,
   deleteModerator,
@@ -9,7 +8,7 @@ import {
   updateInquiryFlag,
   getUsers,
   deleteUser,
-} from "../controllers/adminController";
+} from "../controllers/adminController.js";
 
 const router = express.Router();
 

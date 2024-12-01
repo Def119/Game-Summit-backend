@@ -3,9 +3,9 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import mongoose from "mongoose"; // Import mongoose
-import userRoutes from "./routes/userRoutes"; // Import userRoutes
-import moderatorRoutes from "./routes/moderatorRoutes"; // Import moderatorRoutes
-import adminRoutes from "./routes/adminRouter"; // Import adminRoutes
+import userRoutes from "./routes/userRoutes.js"; // Import userRoutes
+import moderatorRoutes from "./routes/moderatorRoutes.js"; // Import moderatorRoutes
+import adminRoutes from "./routes/adminRouter.js"; // Import adminRoutes
 
 const server = express();
 dotenv.config();
@@ -13,10 +13,10 @@ dotenv.config();
 const mongoURL = process.env.MONGOURL;
 
 // Connect to MongoDB
-mongoose.connect(mongoURL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+// mongoose.connect(mongoURL, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// });
 
 // Middleware
 server.use(
