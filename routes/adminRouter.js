@@ -1,7 +1,7 @@
-const express = require("express");
+import express from 'express';
 const router = express.Router();
-const auth = require('../authentication/userAuth')
-const adminController = require("../controllers/adminController");
+import router from '../authentication/userAuth';
+import adminController from '../controllers/adminController';
 
 
 router.get('/moderators',adminController.getModerators);
