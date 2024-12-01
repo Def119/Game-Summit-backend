@@ -41,4 +41,4 @@ router.delete("/reviews/:id", authenticateToken, deleteReview);
 
 router.get("/reviews/exists/:id", authenticateToken, checkExistingReview);
 
-module.exports = router;
+export default router;
