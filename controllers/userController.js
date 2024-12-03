@@ -12,38 +12,9 @@ dotenv.config();
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
-export const signUp = async (req, res) => {
-  const { username, email, password } = req.body;
-  try {
-    console.log(req.body);
-
-    // Check if the user already existsW
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
-    }
-
-    // Insert the new user into the Users collection
-    const newUser = new User({ username, email, password });
-    await newUser.save();
-
-    // Generate a JWT token for the new user
-    const token = jwt.sign(
-      { userId: newUser.id }, // Include payload data, e.g., user ID
-      SECRET_KEY,
-      { expiresIn: "8h" } // Set token expiration time
-    );
-
-    // Return the token along with a success message
-    res.status(201).json({ message: "User signed up successfully", token });
-  } catch (error) {
-    console.error("Error signing up user:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
 export const logIn = async (req, res) => {
   const { email, password } = req.body;
+  console.log("🚀 ~ logIn ~ req.body:", req.body);
   let user = null;
   let moderator = false;
   let admin = false;
@@ -75,8 +46,10 @@ export const logIn = async (req, res) => {
 
       // email compare  for admin check
       if (email === adminEmail) {
-        console.log("given email " + email + "admin email   " + adminEmail);
+        console.log("given email " + email + " admin email   " + adminEmail);
         const isMatch = await bcrypt.compare(password, adminPasswordHash);
+        console.log("🚀 ~ logIn ~ isMatch:", isMatch);
+
         if (isMatch) {
           admin = true;
         }
@@ -100,10 +73,40 @@ export const logIn = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+export const signUp = async (req, res) => {
+  const { username, email, password } = req.body;
+  try {
+    console.log(req.body);
+
+    // Check if the user already existsW
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // Insert the new user into the Users collection
+    const newUser = new User({ username, email, password });
+    await newUser.save();
+
+    // Generate a JWT token for the new user
+    const token = jwt.sign(
+      { userId: newUser.id }, // Include payload data, e.g., user ID
+      SECRET_KEY,
+      { expiresIn: "8h" } // Set token expiration time
+    );
+
+    // Return the token along with a success message
+    res.status(201).json({ message: "User signed up successfully", token });
+  } catch (error) {
+    console.error("Error signing up user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const getGames = async (req, res) => {
-  const searchTerm = req.query.q; // Get the search term from the query parameter
-  console.log(searchTerm);
+  const searchTerm = req.query.q;
+
+  console.log("🚀 ~ getGames ~ req.query.q:", req.query.q);
 
   try {
     let gamesList;
