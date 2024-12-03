@@ -41,6 +41,7 @@ vi.mock("../model/gameModel.js", { spy: true }, async () => {
   return {
     default: {
       find: vi.fn(),
+      findById: vi.fn(),
     },
   };
 });
@@ -298,15 +299,11 @@ describe("GetGames testing", () => {
       },
     ];
     Game.find.mockReturnValue({
-      sort: vi
-        .fn()
-        .mockReturnValue({
-          limit: vi
-            .fn()
-            .mockReturnValue({
-              exec: vi.fn().mockResolvedValue(mockGamesList),
-            }),
+      sort: vi.fn().mockReturnValue({
+        limit: vi.fn().mockReturnValue({
+          exec: vi.fn().mockResolvedValue(mockGamesList),
         }),
+      }),
     });
     await getGames(req, res);
 
@@ -316,5 +313,79 @@ describe("GetGames testing", () => {
     );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(mockGamesList);
+  });
+});
+
+describe("getGameInfo testing", () => {
+  it("should find the game data with a valid id", async () => {
+    const req = {
+      params: {
+        id: "60b725f10c9c81b531fb01d6",
+      },
+    };
+
+    const res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    };
+
+    const mockGame = { name: "test", rating: 4 };
+    Game.findById.mockResolvedValue(mockGame);
+
+    await getGameInfo(req, res);
+
+    expect(Game.findById).toHaveBeenCalledWith(req.params.id);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(mockGame);
+  });
+
+  it("should not find the game data with a valid id", async () => {
+    const req = {
+      params: {
+        id: "60b725f10c9c81b531fb01d6",
+      },
+    };
+
+    const res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    };
+
+    const mockGame = null;
+    Game.findById.mockResolvedValue(mockGame);
+
+    await getGameInfo(req, res);
+
+    expect(Game.findById).toHaveBeenCalledWith(req.params.id);
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: "Game not found" });
+  });
+
+  it("should return a error if the id not valid", async () => {
+    const req = {
+      params: {
+        id: "invalid id",
+      },
+    };
+
+    const res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    };
+
+    await getGameInfo(req, res);
+
+    expect(Game.findById).toHaveBeenCalledTimes(0);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Invalid game ID format",
+    });
+  });
+});
+
+describe("postReview testing", () => {
+  it("should add a game review", () => {
+
+    const req
   });
 });
