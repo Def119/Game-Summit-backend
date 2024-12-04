@@ -14,7 +14,7 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 export const logIn = async (req, res) => {
   const { email, password } = req.body;
-  console.log("🚀 ~ logIn ~ req.body:", req.body);
+  
   let user = null;
   let moderator = false;
   let admin = false;
@@ -46,9 +46,9 @@ export const logIn = async (req, res) => {
 
       // email compare  for admin check
       if (email === adminEmail) {
-        console.log("given email " + email + " admin email   " + adminEmail);
+      
         const isMatch = await bcrypt.compare(password, adminPasswordHash);
-        console.log("🚀 ~ logIn ~ isMatch:", isMatch);
+        
 
         if (isMatch) {
           admin = true;
@@ -76,7 +76,7 @@ export const logIn = async (req, res) => {
 export const signUp = async (req, res) => {
   const { username, email, password } = req.body;
   try {
-    console.log(req.body);
+    
 
     // Check if the user already existsW
     const existingUser = await User.findOne({ email });
@@ -106,7 +106,7 @@ export const signUp = async (req, res) => {
 export const getGames = async (req, res) => {
   const searchTerm = req.query.q;
 
-  console.log("🚀 ~ getGames ~ req.query.q:", req.query.q);
+
 
   try {
     let gamesList;
@@ -138,7 +138,6 @@ export const getGames = async (req, res) => {
 
 export const getGameInfo = async (req, res) => {
   const gameId = req.params.id; // Get the game ID from the request parameters
-  console.log(gameId);
 
   try {
     // Check if the provided ID is a valid ObjectId
@@ -165,7 +164,7 @@ export const postReview = async (req, res) => {
     const { id, reviewText, rating } = req.body;
     const { userId } = req.user;
 
-    console.log(id, reviewText, rating, userId);
+
     if (!id) {
       return res.status(400).json({ error: "Game ID is required" });
     }
@@ -176,15 +175,16 @@ export const postReview = async (req, res) => {
       userId: userId,
       reviewText,
       rating: Number(rating),
-
       createdAt: new Date(),
     });
 
+    console.log("gonna run save");
     // Save the new review
     await newReview.save();
-
+    console.log("ran save");
     // Update the game's rating and number of users rated
     const game = await Game.findOne({ _id: id });
+
 
     if (game) {
       const newUserRating =
@@ -265,7 +265,7 @@ export const postInquiry = async (req, res) => {
       email,
       message,
     });
-    console.log("her adada: " + newInquiry);
+   
     await newInquiry.save();
 
     // Respond with the created inquiry
@@ -285,7 +285,7 @@ export const checkExistingReview = async (req, res) => {
     const { id: gameId } = req.params;
     const { userId } = req.user;
 
-    // console.log("game " + gameId + " user " + userId);
+   
 
     const gameObjectId = new mongoose.Types.ObjectId(gameId);
     const userObjectId = new mongoose.Types.ObjectId(userId);
@@ -308,7 +308,7 @@ export const deleteReview = async (req, res) => {
     const { id: gameId } = req.params;
     const { userId } = req.user;
 
-    console.log("game " + gameId + " user " + userId);
+ 
 
     const gameObjectId = new mongoose.Types.ObjectId(gameId);
     const userObjectId = new mongoose.Types.ObjectId(userId);

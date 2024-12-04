@@ -18,6 +18,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { describe, vi, it, expect, beforeEach } from "vitest";
 import Game from "../model/gameModel.js";
+import Review from "../model/reviewsModel.js";
 
 vi.mock("../model/userModel.js", { spy: true }, async () => {
   return {
@@ -42,6 +43,8 @@ vi.mock("../model/gameModel.js", { spy: true }, async () => {
     default: {
       find: vi.fn(),
       findById: vi.fn(),
+      findOne: vi.fn(),
+      updateOne: vi.fn(),
     },
   };
 });
@@ -383,9 +386,66 @@ describe("getGameInfo testing", () => {
   });
 });
 
-describe("postReview testing", () => {
-  it("should add a game review", () => {
+vi.mock("../model/reviewsModel.js", () => {
+  return {
+    default: vi.fn().mockImplementation(() => {
+      return {
+        save: vi.fn().mockResolvedValue({
+          gameId: "60b725f10c9c81b531fb01d6",
+          userId: "60b725f10c9c81b531fb01d6",
+          reviewText: "testing",
+          rating: 5,
+          createdAt: new Date(), // Only include the saved fields
+        }),
+      };
+    }),
+  };
+});
 
-    const req
+describe("postReview testing", () => {
+  it("should add a game review", async () => {
+    const req = {
+      body: {
+        id: "60b725f10c9c81b531fb01d6",
+        reviewText: "testing",
+        rating: 5,
+      },
+      user: {
+        userId: "60b725f10c9c81b531fb01d6",
+      },
+    };
+
+    const res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    };
+
+    const mockGame = {
+      _id: "60b725f10c9c81b531fb01d6",
+      userRating: 4.5,
+      usersRated: 10,
+    };
+
+    Game.findOne.mockResolvedValue(mockGame);
+    Game.updateOne.mockResolvedValue({});
+
+    await postReview(req, res);
+
+    // Corrected expectation for `res.json`
+    expect(res.status).toHaveBeenCalledWith(201);
+
+    // Verify Game.findOne and Game.updateOne calls
+    expect(Game.findOne).toHaveBeenCalledWith({ _id: req.body.id });
+    expect(Game.updateOne).toHaveBeenCalledWith(
+      { _id: req.body.id },
+      {
+        $set: {
+          userRating:
+            (mockGame.userRating * mockGame.usersRated + req.body.rating) /
+            (mockGame.usersRated + 1),
+          usersRated: mockGame.usersRated + 1,
+        },
+      }
+    );
   });
 });
